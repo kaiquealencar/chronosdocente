@@ -12,15 +12,13 @@
     <nav class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                
                 <div class="flex items-center">
                     <a href="{{ url_for('index') }}" class="text-xl font-bold text-blue-600 uppercase tracking-wider">
                         ChronosDocente
                     </a>
-                </div>                 
+                </div>                
 
                 <div class="flex items-center space-x-6">
-                    
                     <div class="relative">
                         <button id="menuButton" class="text-gray-700 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
                             Cadastros
@@ -34,7 +32,7 @@
                             <a href="{{ url_for('escolas_view')}}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
                                 <span class="material-symbols-outlined mr-2 text-base">school</span> Escolas
                             </a>
-                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
+                              <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
                                 <span class="material-symbols-outlined mr-2 text-base">menu_book</span> Disciplinas
                             </a>
                         </div>
@@ -43,15 +41,13 @@
                     <div class="flex items-center space-x-4">
                         <span class="text-gray-300">|</span>
                         <span class="text-gray-600 text-sm hidden md:block">                            
-                            Olá, prof. <strong>{{ current_user.first_name }}</strong>
+                            Olá, <strong>{{ current_user.first_name }}</strong>
                         </span>
                         <a href="{{ url_for('logout') }}" class="flex items-center text-gray-500 hover:text-red-600 transition-colors duration-200 font-medium">
-                            <span class="material-symbols-outlined mr-1">logout</span>
-                            Sair
+                            <span class="material-symbols-outlined mr-1">logout</span> Sair
                         </a>
                     </div>
                 </div>
-
             </div>
         </div>
     </nav>
@@ -60,55 +56,11 @@
         {% block content %}{% endblock %}
     </main>
 
+    <div id="flask-messages" 
+         data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}'>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            background: '#ffffff',
-            color: '#1e293b',
-            customClass: {
-                popup: 'rounded-2xl border border-slate-100 shadow-2xl'
-            },
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
-        });
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-                Toast.fire({
-                    icon: '{{ "success" if category == "success" else "error" }}',
-                    title: {{ message|tojson|safe }},
-                    iconColor: '{{ "#4f46e5" if category == "success" else "#ef4444" }}',
-                });
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-    });
-
-    const menuButton = document.getElementById('menuButton');
-    const menuDropdown = document.getElementById('menuDropdown');
-
-    if (menuButton && menuDropdown) {
-        menuButton.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            menuDropdown.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!menuDropdown.contains(e.target) && e.target !== menuButton) {
-                menuDropdown.classList.add('hidden');
-            }
-        });
-    }
-    </script>
 </body>
 </html>
