@@ -9,8 +9,13 @@ class Usuario(db.Model, UserMixin):
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     name = db.Column(db.String(150))
+    tipo_usuario = db.Column(db.String(20), default="professor")
+    is_admin = db.Column(db.Boolean, default=False)
 
-    aulas = db.relationship("Aula", back_populates="professor")
+    aulas = relationship("Aula", back_populates="professor")
+    disciplinas = relationship("Disciplina", back_populates="usuario")
+    escolas = relationship("Escola", back_populates="usuario") 
+    series = relationship("Serie", back_populates="usuario")
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -18,9 +23,11 @@ class Usuario(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+
     @property
     def first_name(self):
         if self.name:
             return self.name.split()[0]
         
         return self.username
+    

@@ -16,6 +16,7 @@ class Aula(db.Model):
     disciplina = relationship("Disciplina", back_populates="aulas")
     professor = relationship("Usuario", back_populates="aulas")
     escola = relationship("Escola", back_populates="aulas")
-    serie = db.relationship("Serie", back_populates="aulas")
+    serie = relationship("Serie", back_populates="aulas")
+    
 
     criado_em = db.Column(db.DateTime, default=db.func.now())

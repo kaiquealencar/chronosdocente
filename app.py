@@ -1,8 +1,8 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_user, login_required, logout_user, current_user
 from flask.views import MethodView
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from dotenv import load_dotenv
 
 from extensions import db, login_manager, migrate
@@ -12,6 +12,10 @@ from models.escola import Escola
 
 load_dotenv()
 
+def is_admin():
+    return current_user.is_authenticated and getattr(current_user, 'is_admin', False)
+
+
 class EscolaView(MethodView):
     decorators = [login_required]
 
@@ -19,13 +23,29 @@ class EscolaView(MethodView):
         if id or request.endpoint == 'escola_create':
             escola = db.session.get(Escola, id)
             return render_template("escolas/escola_form.html", escola=escola)
+        
+        try:
+            page = request.args.get('page', 1, type=int)
+            if page < 1:
+                page = 1
+        except (TypeError, ValueError):
+            page = 1
+            
+        stmt = select(Escola)
 
-        query = select(Escola).order_by(Escola.nome)
-        escolas = db.session.execute(query).scalars().all()
-        return render_template("escolas/escolas_list.html", escolas=escolas)
+        if not is_admin():
+            stmt = stmt.where(Escola.usuario_id == current_user.id)
+
+        stmt = stmt.order_by(Escola.nome)
+
+        pagination = db.paginate(stmt, page=page, per_page=6, error_out=False)
+
+        return render_template("escolas/escolas_list.html", 
+                               escolas=pagination.items,
+                               pagination=pagination,
+                               is_admin=is_admin())
     
     def post(self, id=None):
-
         if request.endpoint == 'escola_excluir':
             try:
                 escola = db.session.get(Escola, id)
@@ -42,10 +62,11 @@ class EscolaView(MethodView):
                 db.session.rollback()
                 flash(f'Erro ao excluir: {e}', 'error')
                 return redirect(url_for('escolas_view'))
-
-        nome_escola = request.form.get('nome')
-        cidade_escola = request.form.get('cidade')
+      
         try:
+            nome_escola = request.form.get('nome')
+            cidade_escola = request.form.get('cidade')
+            
             if id:
                 escola = db.session.get(Escola, id)
                 if not escola:
@@ -58,7 +79,8 @@ class EscolaView(MethodView):
             else:
                 nova_escola = Escola(
                     nome=nome_escola,
-                    cidade=cidade_escola
+                    cidade=cidade_escola,
+                    usuario_id = current_user.id
                 )
                 db.session.add(nova_escola)
                 mensagem = "Escola cadastrada com sucesso!"
@@ -140,7 +162,7 @@ app = create_app()
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    return render_template('index.html', is_admin=is_admin())
 
 @app.route('/usuario/novo', methods=['GET', 'POST'])
 def create_user():
@@ -212,11 +234,6 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
-
-
-
-
 
 
 if __name__ == '__main__':
