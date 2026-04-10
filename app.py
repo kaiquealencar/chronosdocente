@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_user, login_required, logout_user, current_user
 from flask.views import MethodView
-from sqlalchemy import select, or_
+from sqlalchemy import select
 from dotenv import load_dotenv
 
 from extensions import db, login_manager, migrate
