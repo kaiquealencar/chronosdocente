@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
+
+    <div class="w-full max-w-xl bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-white">
+        
+        <div class="flex flex-col items-center mb-8 text-center">
+            <div class="relative flex items-center justify-center w-20 h-20 bg-indigo-50 rounded-2xl mb-4 border-2 border-indigo-100 -rotate-3 hover:rotate-0 transition-transform duration-300">
+                <span class="material-symbols-outlined text-5xl text-indigo-400">
+                    school
+                </span>
+                <div class="absolute -top-2 -right-2 bg-indigo-600 rounded-full w-9 h-9 flex items-center justify-center border-4 border-white shadow-lg">
+                    <span class="material-symbols-outlined text-white text-lg">
+                        {{ 'edit' if escola else 'add' }}
+                    </span>
+                </div>
+            </div>
+
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                {{ 'Editar' if escola else 'Nova' }} <span class="text-indigo-600">Escola</span>
+            </h1>
+            <p class="text-sm text-gray-500 mt-2">
+                {{ 'Atualize os dados da instituição' if escola else 'Cadastre uma nova instituição no sistema' }}
+            </p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for category, message in messages %}
+                        <div class="p-4 text-sm rounded-xl flex items-center shadow-sm border-l-4 
+                            {{ 'bg-green-50 border-green-500 text-green-800' if category == 'success' else 'bg-red-50 border-red-500 text-red-800' }}" 
+                            role="alert">
+                            <span class="material-symbols-outlined mr-2 text-lg">
+                                {{ 'check_circle' if category == 'success' else 'error' }}
+                            </span>
+                            <span class="font-medium">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('escola_edit', id=escola.id) if escola else url_for('escola_create') }}" method="POST" class="space-y-6">
+            
+            <div>
+                <label for="nome" class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Nome da Instituição</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                        account_balance
+                    </span>
+                    <input type="text" id="nome" name="nome" required
+                        class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all placeholder:text-gray-400"
+                        placeholder="Ex: E.E. Prof. José de Alencar"
+                        value="{{ escola.nome if escola else '' }}">
+                </div>
+            </div>
+
+            <div>
+                <label for="cidade" class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Cidade / Município</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                        location_on
+                    </span>
+                    <input type="text" id="cidade" name="cidade" required
+                        class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all placeholder:text-gray-400"
+                        placeholder="Ex: São José dos Campos"
+                        value="{{ escola.cidade if escola else '' }}">
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <a href="{{ url_for('escolas_view') }}" 
+                   class="flex-1 inline-flex items-center justify-center px-6 py-4 border border-gray-200 text-gray-600 font-semibold rounded-2xl hover:bg-gray-50 transition-all active:scale-[0.98]">
+                    {%if escola %} Voltar {% else %} Cancelar {% endif %}
+                </a>
+                
+                <button type="submit" 
+                    class="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl"> save </span>
+                    {{ 'Salvar Alterações' if escola else 'Confirmar Cadastro' }}
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

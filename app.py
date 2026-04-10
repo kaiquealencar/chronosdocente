@@ -1,14 +1,97 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import login_user, login_required, logout_user, current_user
+from flask.views import MethodView
 from sqlalchemy import select
 from dotenv import load_dotenv
 
 from extensions import db, login_manager, migrate
 from config import Config
 from models.usuario import Usuario
+from models.escola import Escola
 
 load_dotenv()
+
+class EscolaView(MethodView):
+    decorators = [login_required]
+
+    def get(self, id=None):
+        if id or request.endpoint == 'escola_create':
+            escola = db.session.get(Escola, id)
+            return render_template("escolas/escola_form.html", escola=escola)
+
+        query = select(Escola).order_by(Escola.nome)
+        escolas = db.session.execute(query).scalars().all()
+        return render_template("escolas/escolas_list.html", escolas=escolas)
+    
+    def post(self, id=None):
+
+        if request.endpoint == 'escola_excluir':
+            try:
+                escola = db.session.get(Escola, id)
+                if escola:
+                    db.session.delete(escola)
+                    db.session.commit()
+                    flash('Escola removida com sucesso!', 'success')
+                else:
+                    flash('Escola não encontrada.', 'error')
+
+                return redirect(url_for('escolas_view'))
+
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Erro ao excluir: {e}', 'error')
+                return redirect(url_for('escolas_view'))
+
+        nome_escola = request.form.get('nome')
+        cidade_escola = request.form.get('cidade')
+        try:
+            if id:
+                escola = db.session.get(Escola, id)
+                if not escola:
+                    flash('Escola não encontrada para edição', 'error')
+                    return redirect(url_for('escolas_view'))
+                
+                escola.nome = nome_escola
+                escola.cidade = cidade_escola
+                mensagem = "Escola Atualizada com sucesso!"
+            else:
+                nova_escola = Escola(
+                    nome=nome_escola,
+                    cidade=cidade_escola
+                )
+                db.session.add(nova_escola)
+                mensagem = "Escola cadastrada com sucesso!"
+
+            db.session.commit()
+            flash(f'{mensagem}', 'success')
+            return redirect(url_for('escolas_view'))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Não foi possível cadastrar a escola. Erro: {e}', 'error')   
+
+            escola_atual = db.session.get(Escola, id) if id else None 
+            return render_template('escolas/escola_form.html', escola=escola_atual)
+
+    def delete(self, id):
+        try:
+            escola = db.session.get(Escola, id)
+
+            if not escola:
+                return {'messsage': 'Escola não encontrada'}, 400
+            
+            db.session.delete(escola)
+            db.session.commit()
+
+            flash('Escola excluída com sucesso', 'success')
+            return {'message': 'Excluído'}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'message': str(e)}, 500
+
+
 
 def create_app():    
     app = Flask(__name__)
@@ -20,6 +103,24 @@ def create_app():
 
     migrate.init_app(app, db)
 
+    app.add_url_rule('/escolas', 
+                     view_func=EscolaView.as_view('escolas_view'), 
+                     methods=['GET', 'POST'])
+    
+
+    app.add_url_rule('/escolas/novo', 
+                     view_func=EscolaView.as_view('escola_create'), 
+                     methods=['GET', 'POST'])
+    
+    app.add_url_rule('/escolas/edit/<int:id>', 
+                     view_func=EscolaView.as_view('escola_edit'), 
+                     methods=['GET', 'POST'])
+    
+    app.add_url_rule('/escolas/excluir/<int:id>', 
+                     view_func=EscolaView.as_view('escola_excluir'), 
+                     methods=['GET', 'POST', 'DELETE'])
+
+
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(Usuario, int(user_id))
@@ -27,15 +128,14 @@ def create_app():
 
     from models.usuario import Usuario
     from models.aula import Aula
-    from models.escola import Escola
     from models.disciplina import Disciplina
     from models.serie import Serie
 
     return app
 
+
+
 app = create_app()
-
-
 
 @app.route('/')
 @login_required
@@ -112,6 +212,12 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

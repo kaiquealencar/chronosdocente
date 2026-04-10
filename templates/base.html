@@ -31,7 +31,7 @@
                             <a href="{{ url_for('create_user') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
                                 <span class="material-symbols-outlined mr-2 text-base">person_add</span> Novo Usuário
                             </a>
-                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
+                            <a href="{{ url_for('escolas_view')}}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
                                 <span class="material-symbols-outlined mr-2 text-base">school</span> Escolas
                             </a>
                             <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
@@ -61,25 +61,38 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            background: '#ffffff',
+            color: '#1e293b',
+            customClass: {
+                popup: 'rounded-2xl border border-slate-100 shadow-2xl'
+            },
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-            Toast.fire({
-                icon: '{{ "success" if category == "success" else "error" }}',
-                title: '{{ message }}'
-            });
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+                Toast.fire({
+                    icon: '{{ "success" if category == "success" else "error" }}',
+                    title: {{ message|tojson|safe }},
+                    iconColor: '{{ "#4f46e5" if category == "success" else "#ef4444" }}',
+                });
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    });
 
     const menuButton = document.getElementById('menuButton');
     const menuDropdown = document.getElementById('menuDropdown');
