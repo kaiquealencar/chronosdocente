@@ -2,18 +2,18 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_user, login_required, logout_user, current_user
 from flask.views import MethodView
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from dotenv import load_dotenv
 
 from extensions import db, login_manager, migrate
 from config import Config
 from models.usuario import Usuario
 from models.escola import Escola
-
+from models.disciplina import Disciplina
+from utils import is_admin, criar_paginacao
 load_dotenv()
 
-def is_admin():
-    return current_user.is_authenticated and getattr(current_user, 'is_admin', False)
+
 
 
 class EscolaView(MethodView):
@@ -24,27 +24,13 @@ class EscolaView(MethodView):
             escola = db.session.get(Escola, id)
             return render_template("escolas/escola_form.html", escola=escola)
         
-        try:
-            page = request.args.get('page', 1, type=int)
-            if page < 1:
-                page = 1
-        except (TypeError, ValueError):
-            page = 1
-            
-        stmt = select(Escola)
-
-        if not is_admin():
-            stmt = stmt.where(Escola.usuario_id == current_user.id)
-
-        stmt = stmt.order_by(Escola.nome)
-
-        pagination = db.paginate(stmt, page=page, per_page=6, error_out=False)
-
+        pagination, usuario_admin = criar_paginacao(request, Escola, current_user, "nome") 
         return render_template("escolas/escolas_list.html", 
-                               escolas=pagination.items,
+                             escolas=pagination.items,
                                pagination=pagination,
-                               is_admin=is_admin())
-    
+                               is_admin=usuario_admin) 
+        
+      
     def post(self, id=None):
         if request.endpoint == 'escola_excluir':
             try:
@@ -114,6 +100,76 @@ class EscolaView(MethodView):
             return {'message': str(e)}, 500
 
 
+class DisciplinaView(MethodView):
+    
+    def get(self, id=None):
+        if id or request.endpoint == 'disciplina_create':
+            disciplina_atual = None
+            if id:
+                disciplina_atual = db.session.get(Disciplina, id)
+                if not disciplina_atual:
+                    flash('Disciplina não encontrada.', 'error')
+                    return redirect(url_for('disciplina_view'))
+
+            return render_template('disciplinas/disciplina_form.html', disciplina=disciplina_atual)
+        
+        pagination, usuario_admin = criar_paginacao(request, Disciplina, current_user, 'id', True)     
+
+        return render_template('disciplinas/disciplinas_list.html',
+                               disciplinas=pagination.items, 
+                               pagination=pagination,
+                               is_admin=usuario_admin)
+
+            
+
+
+    def post(self, id=None):
+        if request.endpoint == 'disciplina_excluir':
+            try:
+                disciplina = db.session.get(Disciplina, id)
+                if disciplina:
+                    db.session.delete(disciplina)
+                    db.session.commit()
+                    flash('Disciplina removida com sucesso!', 'success')
+                else:
+                    flash('Disciplina não encontrada.', 'error')
+                return redirect(url_for('disciplina_view'))
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Erro ao excluir: {e}', 'error')
+                return redirect(url_for('disciplina_view'))
+      
+        try:
+            nome_disciplina = request.form.get('nome')
+            
+            if id:
+                disciplina = db.session.get(Disciplina, id)
+                if not disciplina:
+                    flash('Disciplina não encontrada para edição', 'error')
+                    return redirect(url_for('disciplina_view'))
+                
+                disciplina.nome = nome_disciplina
+                mensagem = "Disciplina Atualizada com sucesso!"
+            else:
+                nova_disciplina = Disciplina(
+                    nome=nome_disciplina,
+                    usuario_id=current_user.id
+                )
+                db.session.add(nova_disciplina)
+                mensagem = "Disciplina cadastrada com sucesso!"
+
+            db.session.commit()
+            flash(f'{mensagem}', 'success')
+            return redirect(url_for('disciplina_view'))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao salvar: {e}', 'error')   
+
+            disciplina_atual = db.session.get(Disciplina, id) if id else None 
+            return render_template('disciplinas/disciplina_form.html', disciplina=disciplina_atual)
+    def delete(self, id=None):
+        pass
 
 def create_app():    
     app = Flask(__name__)
@@ -125,6 +181,7 @@ def create_app():
 
     migrate.init_app(app, db)
 
+    #Routes Escolas
     app.add_url_rule('/escolas', 
                      view_func=EscolaView.as_view('escolas_view'), 
                      methods=['GET', 'POST'])
@@ -143,6 +200,25 @@ def create_app():
                      methods=['GET', 'POST', 'DELETE'])
 
 
+    #Routes Disciplinas
+    app.add_url_rule('/disciplinas', 
+                     view_func=DisciplinaView.as_view('disciplina_view'),
+                     methods=['GET', 'POST']
+                     )
+    
+    app.add_url_rule('/disciplina/novo',
+                     view_func=DisciplinaView.as_view('disciplina_create'),
+                     methods=['GET', 'POST'])
+    
+    app.add_url_rule('/disciplina/edit/<int:id>',
+                     view_func=DisciplinaView.as_view('disciplina_edit'),
+                     methods=['GET', 'POST'])
+    
+    app.add_url_rule('/disciplina/delete/<int:id>',
+                     view_func=DisciplinaView.as_view('disciplina_excluir'),
+                     methods=['GET', 'POST'])
+                     
+
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(Usuario, int(user_id))
@@ -150,7 +226,6 @@ def create_app():
 
     from models.usuario import Usuario
     from models.aula import Aula
-    from models.disciplina import Disciplina
     from models.serie import Serie
 
     return app
@@ -162,7 +237,7 @@ app = create_app()
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', is_admin=is_admin())
+    return render_template('index.html', is_admin=is_admin(current_user))
 
 @app.route('/usuario/novo', methods=['GET', 'POST'])
 def create_user():
