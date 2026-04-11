@@ -7,7 +7,7 @@ class Usuario(db.Model, UserMixin):
     __tablename__ = "usuarios"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    password = db.Column(db.String(256), nullable=False)
     name = db.Column(db.String(150))
     tipo_usuario = db.Column(db.String(20), default="professor")
     is_admin = db.Column(db.Boolean, default=False)

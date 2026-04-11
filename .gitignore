@@ -28,6 +28,9 @@ ENV
 env.bak
 venv.bak
 
+### SEEDS ###
+seeds_db/
+
 ### Variáveis de Ambiente ###
 .env
 .flaskenv

@@ -6,14 +6,15 @@ from sqlalchemy import select, desc
 from dotenv import load_dotenv
 
 from extensions import db, login_manager, migrate
-from config import Config
+from config import config
 from models.usuario import Usuario
 from models.escola import Escola
 from models.disciplina import Disciplina
-from utils.decorator import escola_pertence_ao_usuario
+from utils.decorator import escola_pertence_ao_usuario, disciplina_pertence_ao_usuario
 from utils.helpers import is_admin
 from utils.pagination import criar_paginacao
 from repositories.escola_repository import get_escola_by_id, create_escola, edit_escola, delete_escola
+from repositories.disciplina_respository import get_disciplina_by_id, create_disciplina, edit_disciplina, delete_disciplina
 load_dotenv()
 
 class EscolaView(MethodView):
@@ -62,76 +63,60 @@ class EscolaView(MethodView):
 
 
 class DisciplinaView(MethodView):    
+    decorators = [disciplina_pertence_ao_usuario, login_required]
+
     def get(self, id=None):
-        if id or request.endpoint == 'disciplina_create':
-            disciplina_atual = None
-            if id:
-                disciplina_atual = db.session.get(Disciplina, id)
-                if not disciplina_atual:
-                    flash('Disciplina não encontrada.', 'error')
-                    return redirect(url_for('disciplina_view'))
-
-            return render_template('disciplinas/disciplina_form.html', disciplina=disciplina_atual)
         
-        pagination, usuario_admin = criar_paginacao(request, Disciplina, current_user, 'id', True)     
-
+        if id is not None:
+            return render_template("disciplinas/disciplina_form.html", disciplina=get_disciplina_by_id(id, current_user.id))
+        
+        if request.endpoint == 'disciplina_create':
+            return render_template("disciplinas/disciplina_form.html", disciplina=None)
+        
+        pagination, usuario_admin = criar_paginacao(request, Disciplina, current_user, 'id', True)
         return render_template('disciplinas/disciplinas_list.html',
-                               disciplinas=pagination.items, 
-                               pagination=pagination,
-                               is_admin=usuario_admin)
-
-            
-
+                           disciplinas=pagination.items, 
+                           pagination=pagination,
+                           is_admin=usuario_admin)
+          
 
     def post(self, id=None):
-        if request.endpoint == 'disciplina_excluir':
-            try:
-                disciplina = db.session.get(Disciplina, id)
-                if disciplina:
-                    db.session.delete(disciplina)
-                    db.session.commit()
-                    flash('Disciplina removida com sucesso!', 'success')
-                else:
-                    flash('Disciplina não encontrada.', 'error')
-                return redirect(url_for('disciplina_view'))
-            except Exception as e:
-                db.session.rollback()
-                flash(f'Erro ao excluir: {e}', 'error')
-                return redirect(url_for('disciplina_view'))
-      
-        try:
-            nome_disciplina = request.form.get('nome')
-            
-            if id:
-                disciplina = db.session.get(Disciplina, id)
-                if not disciplina:
-                    flash('Disciplina não encontrada para edição', 'error')
-                    return redirect(url_for('disciplina_view'))
-                
-                disciplina.nome = nome_disciplina
-                mensagem = "Disciplina Atualizada com sucesso!"
-            else:
-                nova_disciplina = Disciplina(
-                    nome=nome_disciplina,
-                    usuario_id=current_user.id
-                )
-                db.session.add(nova_disciplina)
-                mensagem = "Disciplina cadastrada com sucesso!"
+        
+        nome_disciplina = request.form.get('nome')
 
-            db.session.commit()
-            flash(f'{mensagem}', 'success')
+        if request.endpoint == 'disciplina_excluir':
+            sucesso, erro = delete_disciplina(id)
+
+            if sucesso:
+                flash('Disciplina excluída com sucesso!', 'success')
+            else:
+                flash('Não foi possível excluir a disciplina.', 'error')
+            
             return redirect(url_for('disciplina_view'))
         
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Erro ao salvar: {e}', 'error')   
+        if id is None:
+          sucesso, erro = create_disciplina(nome_disciplina, current_user.id)
+          mensagem_sucesso = 'Disciplina criada com sucesso!'        
+        else:
+          sucesso, erro = edit_disciplina(id, nome_disciplina)
+          mensagem_sucesso = 'Disciplina atualizada com sucesso!'
+          
+        if sucesso:
+            flash(mensagem_sucesso, 'success')
+            return redirect(url_for('disciplina_view'))
+          
+     
+        flash(f'Erro: {erro}', 'error')
+        disciplina_atual = {'id': id, 'nome': nome_disciplina}
 
-            disciplina_atual = db.session.get(Disciplina, id) if id else None 
-            return render_template('disciplinas/disciplina_form.html', disciplina=disciplina_atual)
+        return render_template('disciplinas/disciplina_form.html', disciplina=disciplina_atual)      
+
+        
    
 def create_app():    
     app = Flask(__name__)
-    app.config.from_object(Config)
+    env = os.getenv('FLASK_ENV', 'default')
+    app.config.from_object(config[env])    
 
     db.init_app(app)
     login_manager.init_app(app)

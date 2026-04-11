@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from app import create_app
 from extensions import db
 from models.escola import Escola
@@ -17,7 +21,6 @@ def popular_banco():
 
         print(f"Cadastrando escolas para o usuário: {user.username}")
 
-        # 2. Gerar 30 escolas fictícias
         cidades = ["São Paulo", "Rio de Janeiro", "Curitiba", "Belo Horizonte", "Salvador"]
         
         for i in range(1, 31):

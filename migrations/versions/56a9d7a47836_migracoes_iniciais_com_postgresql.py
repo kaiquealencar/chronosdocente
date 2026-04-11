@@ -1,8 +1,8 @@
-"""empty message
+"""Migracoes iniciais com postgresql
 
-Revision ID: 6aadf6de4f9d
+Revision ID: 56a9d7a47836
 Revises: 
-Create Date: 2026-04-10 16:48:45.819951
+Create Date: 2026-04-11 16:59:32.159234
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6aadf6de4f9d'
+revision = '56a9d7a47836'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,6 +23,8 @@ def upgrade():
     sa.Column('username', sa.String(length=150), nullable=False),
     sa.Column('password', sa.String(length=150), nullable=False),
     sa.Column('name', sa.String(length=150), nullable=True),
+    sa.Column('tipo_usuario', sa.String(length=20), nullable=True),
+    sa.Column('is_admin', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('username')
     )
@@ -39,6 +41,7 @@ def upgrade():
     sa.Column('nome', sa.String(length=200), nullable=False),
     sa.Column('cidade', sa.String(length=150), nullable=False),
     sa.Column('usuario_id', sa.Integer(), nullable=False),
+    sa.Column('criado_em', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['usuario_id'], ['usuarios.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('nome', 'usuario_id', name='uq_escola_nome_usuario')

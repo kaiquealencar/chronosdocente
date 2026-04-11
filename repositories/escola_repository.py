@@ -30,6 +30,10 @@ def create_escola(nome_escola, cidade_escola, usuario_id):
 def edit_escola(id, nome, cidade): 
     try:
         escola = db.session.get(Escola, id)
+
+        if not escola:
+            return False, 'Escola não encontrada'
+
         escola.nome = nome    
         escola.cidade = cidade
 
@@ -43,11 +47,14 @@ def edit_escola(id, nome, cidade):
 def delete_escola(escola_id):
     try:
         escola = db.session.get(Escola, escola_id)
-        if escola:
-            db.session.delete(escola)
-            db.session.commit()     
+        
+        if not escola:
+            return False, 'Escola não encontrada'
+        
+        db.session.delete(escola)
+        db.session.commit()     
 
-            return True, None   
+        return True, None   
     except Exception as e:
         db.session.rollback()    
         return False, str(e)
