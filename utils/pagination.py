@@ -1,8 +1,6 @@
 from sqlalchemy import select, desc
 from extensions import db
-
-def is_admin(current_user):
-    return current_user.is_authenticated and getattr(current_user, 'is_admin', False)
+from utils.helpers import is_admin
 
 def criar_paginacao(request, model_class, current_user, ordenar_por=None, descendente=False):
     try:
@@ -14,7 +12,7 @@ def criar_paginacao(request, model_class, current_user, ordenar_por=None, descen
          page =1 
     
     query = select(model_class)
-    user_admin = is_admin(current_user)
+    user_admin = is_admin()
 
     if not user_admin:
          query = query.where(model_class.usuario_id == current_user.id)

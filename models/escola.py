@@ -1,7 +1,9 @@
-from extensions import db
+from datetime import datetime, timezone
 from sqlalchemy.orm import validates
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import  relationship
+from sqlalchemy import func
+from extensions import db
 
 
 class Escola(db.Model):
@@ -10,6 +12,10 @@ class Escola(db.Model):
     nome = db.Column(db.String(200), nullable=False)
     cidade = db.Column(db.String(150), nullable=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
+    criado_em = db.Column(db.DateTime, 
+                      default=lambda: datetime.now(timezone.utc),  
+                      server_default=func.now(),                   
+                      nullable=False)
 
     aulas = relationship("Aula", back_populates="escola")
     usuario = relationship("Usuario", back_populates="escolas")

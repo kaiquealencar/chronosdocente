@@ -10,77 +10,55 @@ from config import Config
 from models.usuario import Usuario
 from models.escola import Escola
 from models.disciplina import Disciplina
-from utils import is_admin, criar_paginacao
+from utils.decorator import escola_pertence_ao_usuario
+from utils.helpers import is_admin
+from utils.pagination import criar_paginacao
+from repositories.escola_repository import get_escola_by_id, create_escola, edit_escola, delete_escola
 load_dotenv()
 
-
-
-
 class EscolaView(MethodView):
-    decorators = [login_required]
+    decorators = [login_required, escola_pertence_ao_usuario]
 
-    def get(self, id=None):
-        if id or request.endpoint == 'escola_create':
-            escola = db.session.get(Escola, id)
-            return render_template("escolas/escola_form.html", escola=escola)
+    def get(self, id=None):   
+        if id is not None:
+            return render_template("escolas/escola_form.html", escola=get_escola_by_id(id, current_user.id))
+          
+        if request.endpoint == 'escola_create':
+            return render_template("escolas/escola_form.html", escola=None)
         
-        pagination, usuario_admin = criar_paginacao(request, Escola, current_user, "nome") 
+        pagination, usuario_admin = criar_paginacao(request, Escola, current_user, "criado_em", True) 
         return render_template("escolas/escolas_list.html", 
                              escolas=pagination.items,
                                pagination=pagination,
-                               is_admin=usuario_admin) 
-        
+                               is_admin=usuario_admin)         
       
-    def post(self, id=None):
+    def post(self, id=None):        
+        nome_escola = request.form.get('nome')
+        cidade_escola = request.form.get('cidade')          
+
         if request.endpoint == 'escola_excluir':
-            try:
-                escola = db.session.get(Escola, id)
-                if escola:
-                    db.session.delete(escola)
-                    db.session.commit()
-                    flash('Escola removida com sucesso!', 'success')
-                else:
-                    flash('Escola não encontrada.', 'error')
-
-                return redirect(url_for('escolas_view'))
-
-            except Exception as e:
-                db.session.rollback()
-                flash(f'Erro ao excluir: {e}', 'error')
-                return redirect(url_for('escolas_view'))
-      
-        try:
-            nome_escola = request.form.get('nome')
-            cidade_escola = request.form.get('cidade')
-            
-            if id:
-                escola = db.session.get(Escola, id)
-                if not escola:
-                    flash('Escola não encontrada para edição', 'error')
-                    return redirect(url_for('escolas_view'))
-                
-                escola.nome = nome_escola
-                escola.cidade = cidade_escola
-                mensagem = "Escola Atualizada com sucesso!"
+            sucesso, erro = delete_escola(id)
+            if sucesso:
+                flash('Escola excluída com sucesso!', 'success')
             else:
-                nova_escola = Escola(
-                    nome=nome_escola,
-                    cidade=cidade_escola,
-                    usuario_id = current_user.id
-                )
-                db.session.add(nova_escola)
-                mensagem = "Escola cadastrada com sucesso!"
+                flash(f'Não foi possível excluir a escolas {erro}', 'error')  
 
-            db.session.commit()
-            flash(f'{mensagem}', 'success')
+            return redirect(url_for('escolas_view'))     
+
+        if id is None:
+            sucesso, erro = create_escola(nome_escola, cidade_escola, current_user.id)
+            mensagem_sucesso = 'Escola criada com sucesso!'
+        else:
+            sucesso, erro = edit_escola(id, nome_escola, cidade_escola)            
+            mensagem_sucesso = 'Escola atualizada com sucesso!'
+
+        if sucesso:
+            flash(mensagem_sucesso, 'success')
             return redirect(url_for('escolas_view'))
         
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Não foi possível cadastrar a escola. Erro: {e}', 'error')   
-
-            escola_atual = db.session.get(Escola, id) if id else None 
-            return render_template('escolas/escola_form.html', escola=escola_atual)
+        flash(f'Erro: {erro}', 'error')
+        escola = {'id':id, 'nome': nome_escola, 'cidade': cidade_escola}
+        return render_template('escolas/escola_form.html', escola=escola)      
 
 
 class DisciplinaView(MethodView):    
@@ -217,7 +195,7 @@ app = create_app()
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', is_admin=is_admin(current_user))
+    return render_template('index.html', is_admin=is_admin())
 
 @app.route('/usuario/novo', methods=['GET', 'POST'])
 def create_user():
