@@ -82,26 +82,8 @@ class EscolaView(MethodView):
             escola_atual = db.session.get(Escola, id) if id else None 
             return render_template('escolas/escola_form.html', escola=escola_atual)
 
-    def delete(self, id):
-        try:
-            escola = db.session.get(Escola, id)
 
-            if not escola:
-                return {'messsage': 'Escola não encontrada'}, 400
-            
-            db.session.delete(escola)
-            db.session.commit()
-
-            flash('Escola excluída com sucesso', 'success')
-            return {'message': 'Excluído'}, 200
-
-        except Exception as e:
-            db.session.rollback()
-            return {'message': str(e)}, 500
-
-
-class DisciplinaView(MethodView):
-    
+class DisciplinaView(MethodView):    
     def get(self, id=None):
         if id or request.endpoint == 'disciplina_create':
             disciplina_atual = None
@@ -168,9 +150,7 @@ class DisciplinaView(MethodView):
 
             disciplina_atual = db.session.get(Disciplina, id) if id else None 
             return render_template('disciplinas/disciplina_form.html', disciplina=disciplina_atual)
-    def delete(self, id=None):
-        pass
-
+   
 def create_app():    
     app = Flask(__name__)
     app.config.from_object(Config)
