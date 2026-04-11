@@ -23,7 +23,7 @@
             </p>
         </div>
         
-        <a href="{{ url_for('escola_create') }}" 
+        <a href="{{ url_for('escolas.escola_create') }}" 
            class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] hover:-translate-y-1">
             <span class="material-symbols-outlined text-2xl">add_business</span>
             Cadastrar Escola
@@ -40,13 +40,13 @@
                 </div>
                 
                 <div class="flex gap-1">
-                    <a href="{{ url_for('escola_edit', id=escola.id) }}" 
+                    <a href="{{ url_for('escolas.escola_edit', id=escola.id) }}" 
                        class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
                        title="Editar">
                         <span class="material-symbols-outlined text-2xl">edit_note</span>
                     </a>
                     
-                    <form action="{{ url_for('escola_excluir', id=escola.id) }}" method="POST" class="inline">
+                    <form action="{{ url_for('escolas.escola_excluir', id=escola.id) }}" method="POST" class="inline">
                         <button type="button" 
                                 onclick="confirmarExclusao(event, this)" 
                                 class="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
@@ -73,7 +73,7 @@
 
             <div class="mt-8 pt-6 border-t border-slate-50 flex justify-between items-center">
                 <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full uppercase">Ativo</span>
-                <a href="{{ url_for('escola_edit', id=escola.id) }}" class="text-indigo-600 text-sm font-bold flex items-center gap-1 hover:underline">
+                <a href="{{ url_for('escolas.escola_edit', id=escola.id) }}" class="text-indigo-600 text-sm font-bold flex items-center gap-1 hover:underline">
                     Ver detalhes <span class="material-symbols-outlined text-sm">arrow_forward</span>
                 </a>
             </div>
