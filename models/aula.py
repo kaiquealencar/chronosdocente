@@ -20,3 +20,9 @@ class Aula(db.Model):
     
 
     criado_em = db.Column(db.DateTime, default=db.func.now())
+
+    __table_args__ = (
+        db.Index('idx_aula_escola_dia', 'escola_id', 'dia_aula'),
+        
+        db.Index('idx_aula_usuario_dia', 'usuario_id', 'dia_aula'),
+    )

@@ -13,6 +13,7 @@ class Disciplina(db.Model):
 
     __table_args__ = (
         UniqueConstraint('nome', 'usuario_id', name='uq_disciplina_nome_usuario'),
+        db.Index('idx_disciplina_usuario', 'usuario_id'),
     )
 
     @validates("nome")

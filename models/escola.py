@@ -19,10 +19,15 @@ class Escola(db.Model):
 
     aulas = relationship("Aula", back_populates="escola")
     usuario = relationship("Usuario", back_populates="escolas")
+    ciclos = db.relationship("Ciclo", back_populates="escola", cascade="all, delete-orphan")
     series = relationship("Serie", back_populates="escola")
 
     __table_args__ = (
         UniqueConstraint('nome', 'usuario_id', name='uq_escola_nome_usuario'),
+        
+        db.Index('idx_escola_usuario', 'usuario_id'),
+        
+        db.Index('idx_escola_cidade', 'cidade'),
     )
 
     @validates("nome")

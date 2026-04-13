@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto p-8">
+    <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-100 border border-slate-50 p-10">
+        <h2 class="text-3xl font-bold text-slate-800 mb-8 tracking-tight">
+            {{ 'Editar' if serie else 'Nova' }} <span class="text-indigo-600">Série</span>
+        </h2>
+
+        <form method="POST" class="space-y-6">
+            <div>
+                <label class="block text-sm font-bold text-slate-600 uppercase mb-2 ml-1">Nome da Série</label>
+                <input type="text" name="nome" value="{{ serie.nome if serie else '' }}" required
+                       class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all text-lg font-medium text-slate-700" 
+                       placeholder="Ex: 1º Ano, 2ª Série A...">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-600 uppercase mb-2 ml-1">Ciclo da Série</label>
+                <div class="relative">
+                    <select name="ciclo_id" required 
+                            class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 appearance-none font-medium text-slate-700">
+                        <option value="" disabled {{ 'selected' if not serie }}>Selecione um ciclo</option>
+                        
+                        {% for ciclo in ciclos %}
+                            <option value="{{ ciclo.id }}" 
+                                {% if serie and serie.ciclo_id == ciclo.id %} selected {% endif %}>
+                                {{ ciclo.nome }} ({{ ciclo.escola.nome }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-400">
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2 ml-1 italic">* Alterar o ciclo moverá esta série na listagem principal.</p>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95">
+                    Salvar Alterações
+                </button>
+                <a href="{{ url_for('estruturas.estrutura_view') }}" class="px-8 py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

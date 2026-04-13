@@ -33,7 +33,8 @@ class UsuarioView(MethodView):
         username = request.form.get('username')
         password = request.form.get('password')
         name = request.form.get('username')
-        tipo_usuario = 'admin' if 'is_admin' in request.form else 'professor'           
+        tipo_usuario = 'admin' if 'is_admin' in request.form else 'professor'   
+        
         is_admin= 'is_admin' in request.form
         ativo = 'ativo' in request.form
 
@@ -57,8 +58,7 @@ class UsuarioView(MethodView):
             successo, error = create_usuario(
                 username, 
                 password,
-                name,   
-                tipo_usuario,             
+                name,                
                 is_admin,
                 ativo
             )
@@ -67,8 +67,7 @@ class UsuarioView(MethodView):
             successo, error = edit_usuario(
                 id,
                 username,
-                name,   
-                tipo_usuario,             
+                name,                
                 is_admin,
                 ativo,
                 password
@@ -76,12 +75,12 @@ class UsuarioView(MethodView):
 
             mensagem_sucesso = 'Usuário editado com sucesso!'
 
-        if successo:
-            flash(mensagem_sucesso, 'success')
-            return redirect(url_for('usuarios.usuario_view'))
+            if successo:
+                flash(mensagem_sucesso, 'success')
+                return redirect(url_for('usuarios.usuario_view'))
             
-        flash(f'Erro: {erro}', 'error')
-        usuario_atual = {'id': id, 'name': name}
+            flash(f'Erro: {erro}', 'error')
+            usuario_atual = {'id': id, 'name': name}
 
-        return render_template('usuarios/usuario_form.html', usuario=usuario_atual)
+            return render_template('usuarios/usuario_form.html', usuario=usuario_atual)
         

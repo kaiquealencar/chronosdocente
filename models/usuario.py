@@ -17,6 +17,7 @@ class Usuario(db.Model, UserMixin):
     disciplinas = relationship("Disciplina", back_populates="usuario")
     escolas = relationship("Escola", back_populates="usuario") 
     series = relationship("Serie", back_populates="usuario")
+    ciclos = db.relationship("Ciclo", back_populates="usuario", cascade="all, delete-orphan")
 
     def tem_vinculos(self):
         return any([self.aulas, self.disciplinas, self.escolas, self.series])
