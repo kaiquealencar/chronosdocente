@@ -11,11 +11,15 @@ class Usuario(db.Model, UserMixin):
     name = db.Column(db.String(150))
     tipo_usuario = db.Column(db.String(20), default="professor")
     is_admin = db.Column(db.Boolean, default=False)
+    ativo= db.Column(db.Boolean, default=True)
 
     aulas = relationship("Aula", back_populates="professor")
     disciplinas = relationship("Disciplina", back_populates="usuario")
     escolas = relationship("Escola", back_populates="usuario") 
     series = relationship("Serie", back_populates="usuario")
+
+    def tem_vinculos(self):
+        return any([self.aulas, self.disciplinas, self.escolas, self.series])
 
     def set_password(self, password):
         self.password = generate_password_hash(password)

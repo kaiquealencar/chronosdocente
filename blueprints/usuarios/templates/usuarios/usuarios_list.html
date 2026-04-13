@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Usuários - ChronosDocente{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-4 md:p-8">
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
+                Gerenciar <span class="text-indigo-600">Usuários</span>
+            </h1>
+            <p class="text-gray-500 mt-2 text-base">
+                Visualize e gerencie as permissões e acessos dos usuários no sistema.
+            </p>
+        </div>
+        
+        <a href="{{ url_for('usuarios.usuario_create') }}" 
+           class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-indigo-100 transition-all active:scale-[0.98] hover:-translate-y-0.5">
+            <span class="material-symbols-outlined">person_add</span>
+            Novo Usuário
+        </a>
+    </div>
+
+    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider">Usuário</th>
+                        <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider text-center">Tipo</th>
+                        <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider text-center">Status</th>
+                        <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for usuario in usuarios %}
+                    <tr class="hover:bg-indigo-50/30 transition-colors group">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-500 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                    <span class="material-symbols-outlined text-xl">account_circle</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-slate-700 text-lg">{{ usuario.name }}</span>
+                                    <span class="text-xs text-slate-400">@{{ usuario.username }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <td class="px-8 py-5 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+                                    {% if usuario.is_admin %}
+                                        bg-purple-100 text-purple-600
+                                    {% else %}
+                                        bg-blue-100 text-blue-600
+                                    {% endif %}">
+                                    {{ usuario.tipo_usuario }}
+                                </span>
+                                {% if usuario.is_admin %}
+                                <span class="text-[10px] text-purple-400 mt-1 font-semibold uppercase">Administrador</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <td class="px-8 py-5 text-center">
+                            {% if usuario.ativo %}
+                                <span class="inline-flex items-center gap-1.5 text-emerald-600 font-bold text-sm">
+                                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    Ativo
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1.5 text-slate-400 font-bold text-sm">
+                                    <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
+                                    Inativo
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-8 py-5">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ url_for('usuarios.usuario_edit', id=usuario.id) }}" 
+                                   class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100"
+                                   title="Editar Usuário">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </a>
+                                
+                                {% if usuario.id != current_user.id %}
+                                <form action="{{ url_for('usuarios.usuario_delete', id=usuario.id) }}" method="POST" class="inline">
+                                    <button type="button" 
+                                            onclick="confirmarExclusao(event, this)" 
+                                            class="p-2 text-slate-400 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100"
+                                            title="Desativar/Excluir">
+                                        <span class="material-symbols-outlined">person_remove</span>
+                                    </button>
+                                </form>                                    
+                                
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="py-20 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="material-symbols-outlined text-6xl text-slate-200 mb-4">group_off</span>
+                                <p class="text-slate-400 text-lg">Nenhum usuário cadastrado.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="mt-12 flex flex-col items-center gap-4">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            
+            {% if pagination.page > 1 %}
+                <a href="{{ url_for(request.endpoint, **dict(request.args, page=1)) }}" 
+                   class="p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm">
+                    <span class="material-symbols-outlined text-xl">first_page</span>
+                </a>
+            {% endif %}
+
+            {% if pagination.has_prev %}
+                <a href="{{ url_for(request.endpoint, **dict(request.args, page=pagination.prev_num)) }}" 
+                   class="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all font-medium flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                </a>
+            {% endif %}
+
+            <div class="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-slate-200">
+                {{ pagination.page }} / {{ pagination.pages }}
+            </div>
+
+            {% if pagination.has_next %}
+                <a href="{{ url_for(request.endpoint, **dict(request.args, page=pagination.next_num)) }}" 
+                   class="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all font-medium flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            {% endif %}
+
+            {% if pagination.page < pagination.pages %}
+                <a href="{{ url_for(request.endpoint, **dict(request.args, page=pagination.pages)) }}" 
+                   class="p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm">
+                    <span class="material-symbols-outlined text-xl">last_page</span>
+                </a>
+            {% endif %}
+        </div>
+        
+        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">
+            Total de {{ pagination.total }} usuários registrados
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+function confirmarExclusao(event, button) {
+    if (confirm("Tem certeza que deseja excluir esta disciplina? Todos os dados vinculados serão perdidos.")) {
+        button.closest('form').submit();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
+
+    <div class="w-full max-w-xl bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-white">
+        
+        <div class="flex flex-col items-center mb-8 text-center">
+            <div class="relative flex items-center justify-center w-20 h-20 bg-indigo-50 rounded-2xl mb-4 border-2 border-indigo-100 -rotate-3 hover:rotate-0 transition-transform duration-300">
+                <span class="material-symbols-outlined text-5xl text-indigo-400">
+                    person
+                </span>
+                <div class="absolute -top-2 -right-2 bg-indigo-600 rounded-full w-9 h-9 flex items-center justify-center border-4 border-white shadow-lg">
+                    <span class="material-symbols-outlined text-white text-lg">
+                        {{ 'edit' if usuario else 'add' }}
+                    </span>
+                </div>
+            </div>
+
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                {{ 'Editar' if usuario else 'Novo' }} <span class="text-indigo-600">Usuário</span>
+            </h1>
+            <p class="text-sm text-gray-500 mt-2">
+                {{ 'Atualize as permissões e dados de acesso' if usuario else 'Cadastre um novo colaborador no sistema' }}
+            </p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for category, message in messages %}
+                        <div class="p-4 text-sm rounded-xl flex items-center shadow-sm border-l-4 
+                            {{ 'bg-green-50 border-green-500 text-green-800' if category == 'success' else 'bg-red-50 border-red-500 text-red-800' }}" 
+                            role="alert">
+                            <span class="material-symbols-outlined mr-2 text-lg">
+                                {{ 'check_circle' if category == 'success' else 'error' }}
+                            </span>
+                            <span class="font-medium">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('usuarios.usuario_edit', id=usuario.id) if usuario else url_for('usuarios.usuario_create') }}" method="POST" class="space-y-5">
+            
+            <div>
+                <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Nome Completo</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                        badge
+                    </span>
+                    <input type="text" id="name" name="name" required
+                        class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all placeholder:text-gray-400"
+                        placeholder="Ex: João Silva"
+                        value="{{ usuario.name if usuario else '' }}">
+                </div>
+            </div>
+
+            <div>
+                <label for="username" class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Nome de Usuário (Login)</label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                        alternate_email
+                    </span>
+                    <input type="text" id="username" name="username" required
+                        class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all placeholder:text-gray-400"
+                        placeholder="Ex: joao.silva"
+                        value="{{ usuario.username if usuario else '' }}">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">
+                    {{ 'Senha (Deixe em branco para não alterar)' if usuario else 'Criar Senha' }}
+                </label>
+                <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                        lock
+                    </span>
+                    <input type="password" id="password" name="password" {{ 'required' if not usuario else '' }}
+                        class="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all placeholder:text-gray-400"
+                        placeholder="••••••••">
+                    
+                    <button type="button" onclick="togglePasswordVisibility()" 
+                        class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-indigo-600 transition-colors focus:outline-none">
+                        <span id="eye-icon" class="material-symbols-outlined text-xl">
+                            visibility
+                        </span>
+                    </button>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-2 ml-2 italic">Mínimo de 8 caracteres, incluindo letras e números.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-gray-100">
+                    <label class="flex items-center cursor-pointer gap-3">
+                        <div class="relative">
+                            <input type="checkbox" name="is_admin" class="sr-only peer" {{ 'checked' if usuario and usuario.is_admin else '' }}>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Administrador</span>
+                    </label>
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-2xl border border-gray-100">
+                    <label class="flex items-center cursor-pointer gap-3">
+                        <div class="relative">
+                            <input type="checkbox" name="ativo" class="sr-only peer" {{ 'checked' if not usuario or usuario.ativo else '' }}>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Conta Ativa</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                <a href="{{ url_for('usuarios.usuario_view') }}" 
+                    class="flex-1 inline-flex items-center justify-center px-6 py-4 border border-gray-200 text-gray-600 font-semibold rounded-2xl hover:bg-gray-50 transition-all active:scale-[0.98]">
+                    {{ 'Voltar' if usuario else 'Cancelar' }}
+                </a>
+                
+                <button type="submit" 
+                    class="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl"> save </span>
+                    {{ 'Salvar Alterações' if usuario else 'Confirmar Cadastro' }}
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.innerText = 'visibility_off';
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.innerText = 'visibility';
+        }
+    }
+</script>
+{% endblock %}
