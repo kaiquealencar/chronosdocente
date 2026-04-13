@@ -28,7 +28,7 @@ def disciplina_pertence_ao_usuario(func):
 
             if not disciplina:
                 flash('Acesso negado.', 'error')
-                return redirect(url_for('disciplina_view'))
+                return redirect(url_for('index'))
             
         return func(*args, **kwargs)
     
