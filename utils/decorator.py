@@ -13,7 +13,7 @@ def escola_pertence_ao_usuario(func):
 
             if not escola:
                 flash('Acesso negado.', 'error')
-                return redirect(url_for('escolas_view'))
+                return redirect(url_for('index'))
             
         return func(*args, **kwargs)
     
