@@ -2,13 +2,14 @@ from extensions import db
 from models.aula import Aula
 
 
-def create_aula(dia_aula, hora_inicio, hora_fim, disciplina_id, usuario_id,
+def create_aula(dia_aula, hora_inicio, hora_fim, quantidade_aula, disciplina_id, usuario_id,
                 escola_id, serie_id):    
     try:    
         nova_aula = Aula(
             dia_aula =  dia_aula,
             hora_inicio = hora_inicio,
             hora_fim = hora_fim,
+            quantidade_aula = quantidade_aula,
             disciplina_id = disciplina_id,
             usuario_id = usuario_id,
             escola_id = escola_id,
@@ -26,7 +27,7 @@ def create_aula(dia_aula, hora_inicio, hora_fim, disciplina_id, usuario_id,
 
 
 
-def edit_aula(id, dia_aula, hora_inicio, hora_fim, disciplina_id, usuario_id,
+def edit_aula(id, dia_aula, hora_inicio, hora_fim, quantidade_aula, disciplina_id, usuario_id,
                 escola_id, serie_id):    
     try:    
         aula = db.session.get(Aula, id)
@@ -41,6 +42,7 @@ def edit_aula(id, dia_aula, hora_inicio, hora_fim, disciplina_id, usuario_id,
         aula.usuario_id = usuario_id
         aula.escola_id = escola_id
         aula.serie_id = serie_id
+        aula.quantidade_aulas = quantidade_aula
         
         db.session.commit()
 

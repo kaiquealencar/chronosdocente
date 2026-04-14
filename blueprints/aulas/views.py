@@ -20,7 +20,6 @@ class AulaView(MethodView):
         if request.endpoint in ['aulas.aulas_create', 'aulas.aulas_edit']:
             aula = None
 
-
             if id:
                 aula = Aula.query.get_or_404(id) 
                 if not current_user.is_admin and aula.usuario_id != current_user.id:
@@ -64,6 +63,7 @@ class AulaView(MethodView):
             dia_aula = datetime.strptime(request.form.get('dia_aula'), '%Y-%m-%d').date()
             hora_inicio = datetime.strptime(request.form.get('hora_inicio'), '%H:%M').time()
             hora_fim = datetime.strptime(request.form.get('hora_fim'), '%H:%M').time()
+            quantidade_aula = int(request.form.get('quantidade_aulas'))
             
             disciplina_id = int(request.form.get('disciplina_id'))
             escola_id = int(request.form.get('escola_id'))
@@ -75,13 +75,13 @@ class AulaView(MethodView):
 
         if id is None:
             sucesso, erro = create_aula(
-                dia_aula, hora_inicio, hora_fim, 
+                dia_aula, hora_inicio, hora_fim, quantidade_aula, 
                 disciplina_id, usuario_id, escola_id, serie_id
             )
             mensagem = 'Aula agendada com sucesso!'
         else:
             sucesso, erro = edit_aula(
-                id, dia_aula, hora_inicio, hora_fim, 
+                id, dia_aula, hora_inicio, hora_fim, quantidade_aula,
                 disciplina_id, usuario_id, escola_id, serie_id
             )
             mensagem = 'Aula atualizada com sucesso!'

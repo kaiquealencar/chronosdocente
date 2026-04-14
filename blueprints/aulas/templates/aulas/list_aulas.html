@@ -92,15 +92,16 @@
                                    title="Editar Aula">
                                     <span class="material-symbols-outlined">edit</span>
                                 </a>
-                                
+                                   
                                 <form action="{{ url_for('aulas.aulas_delete', id=aula.id) }}" method="POST" class="inline">
                                     <button type="button" 
-                                            onclick="confirmarExclusaoAula(event, this)" 
-                                            class="p-2 text-slate-400 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100"
-                                            title="Excluir Aula">
-                                        <span class="material-symbols-outlined">delete</span>
+                                            onclick="confirmarExclusao(event, this)" 
+                                            class="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                            title="Excluir">
+                                        <span class="material-symbols-outlined text-2xl">delete_sweep</span>
                                     </button>
                                 </form>
+                               
                             </div>
                         </td>
                     </tr>
