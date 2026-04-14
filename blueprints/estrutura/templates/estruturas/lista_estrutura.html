@@ -78,6 +78,13 @@
                                 <span class="material-symbols-outlined">edit</span>
                             </a>
                         </td>
+                        <td>
+                            <form action="{{ url_for('estruturas.estrutura_delete_ciclos', id=ciclo.id) }}" method="POST" class="inline">
+                                    <button type="button" onclick="confirmarExclusao(event, this, 'série')" class="p-2.5 text-slate-400 hover:text-red-600 rounded-xl transition-all">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

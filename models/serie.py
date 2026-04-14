@@ -21,14 +21,14 @@ class Ciclo(db.Model):
     )
 
     def tem_vinculos(self):
-        return any([self.escola, self.series, self.usuario])
+        return len(self.series) > 0
 
     @validates("nome")
     def validate_nome(self, key, nome):
         if not nome or not nome.strip():
             raise ValueError("O nome do ciclo não pode estar vazio.")
         
-        nome_limpo = " ".join(nome.split()).title()
+        nome_limpo = " ".join(nome.split())
 
         if len(nome_limpo) < 3:
             raise ValueError("Escreva o nome completo do ciclo.")
@@ -63,11 +63,11 @@ class Serie(db.Model):
     )   
 
     def tem_vinculos(self):
-        return any([self.ciclo, self.escola, self.usuario, self.aulas])
+        return len(self.aulas) > 0
 
     @validates("nome")
     def validate_nome(self, key, nome):
         if not nome or not nome.strip():
             raise ValueError("O nome da série não pode estar vazio.")
         
-        return nome.strip().title()
+        return nome.strip()

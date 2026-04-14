@@ -41,6 +41,9 @@ def delete_serie(id):
         if not serie:
             return False, "Série não existe."
         
+        if serie.tem_vinculos():
+            return False, 'Não é possível excluir série com aulas vinculadas.'
+        
         db.session.delete(serie)
         db.session.commit()
 

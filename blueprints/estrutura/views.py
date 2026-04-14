@@ -60,28 +60,32 @@ class EstuturaViewSerie(MethodView):
     decorators = [login_required]
 
     def get(self, id=None):
-        if request.endpoint == 'estruturas.estrutura_view':
-            ciclos = Ciclo.query.filter_by(usuario_id=current_user.id).order_by(Ciclo.ordem).all()
-            
-            ciclos_ids = [c.id for c in ciclos]
-            series = Serie.query.filter(Serie.ciclo_id.in_(ciclos_ids)).all() if ciclos_ids else []
-            
-            return render_template('estruturas/lista_estrutura.html', ciclos=ciclos, series=series)
-
-        if id:
-            serie = db.session.get(Serie, id)
-            if not serie or serie.usuario_id != current_user.id:
-                abort(403)
-            ciclos = Ciclo.query.filter_by(usuario_id=current_user.id).all()
-            return render_template('estruturas/form_serie.html', serie=serie, ciclos=ciclos)
-
-        ciclos = Ciclo.query.filter_by(usuario_id=current_user.id).all()
-        if not ciclos:
-            flash("Crie um ciclo antes de adicionar uma série.", "info")
-            return redirect(url_for('estruturas.estrutura_view'))
+        ciclos = Ciclo.query.filter_by(usuario_id=current_user.id)\
+            .order_by(Ciclo.ordem).all()
         
-        return render_template('estruturas/form_serie.html', serie=None, ciclos=ciclos)
+        if request.endpoint == 'estruturas.estrutura_create_serie':
+            print(f'Recebeu o click do botão. ENDPOINT: {request.url}')
+            return render_template('estruturas/form_serie.html', ciclos=ciclos)        
+        
+        if id is None:
+            ciclos_ids = [c.id for c in ciclos]
 
+            series = Serie.query.filter(
+                Serie.ciclo_id.in_(ciclos_ids)
+            ).all() if ciclos_ids else []
+
+            return render_template(
+                'estruturas/lista_estrutura.html',
+                ciclos=ciclos,
+                series=series
+            )                
+
+        serie = Serie.query.get_or_404(id)
+        return render_template('estruturas/form_serie.html', serie=serie, ciclos=ciclos)  
+
+
+
+    
     def post(self, id=None):
         if request.endpoint == 'estruturas.estrutura_serie_delete':
             serie = db.session.get(Serie, id)
@@ -96,10 +100,11 @@ class EstuturaViewSerie(MethodView):
             return redirect(url_for('estruturas.estrutura_view'))
 
         nome = request.form.get('nome')
-        ciclo_id = request.form.get('ciclo_id')
+        ciclo_id = request.form.get('ciclo_id', type=int)
 
         if id:
             serie = db.session.get(Serie, id)
+            print(serie.nome, serie.ciclo_id, type(serie.ciclo_id))
 
             if not serie or (serie.usuario_id != current_user.id and not current_user.is_admin):
                 flash("Acesso negado ou série inexistente.", "error")

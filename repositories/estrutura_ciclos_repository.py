@@ -42,6 +42,9 @@ def delete_ciclo(id):
         if not ciclo:
             return False, "Ciclo não encontrado!"
         
+        if ciclo.tem_vinculos():
+            return False, 'Não é possível excluir um ciclo com séries vinculadas.'
+        
         db.session.delete(ciclo)
         db.session.commit()
 
