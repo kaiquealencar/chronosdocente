@@ -29,12 +29,14 @@ def create_app():
     from blueprints.escolas import escolas_bp   
     from blueprints.usuarios import usuarios_bp
     from blueprints.estrutura import estrutura_bp
+    from blueprints.aulas import aulas_bp
 
 
     app.register_blueprint(disciplinas_bp)
     app.register_blueprint(escolas_bp)
     app.register_blueprint(usuarios_bp)
     app.register_blueprint(estrutura_bp)
+    app.register_blueprint(aulas_bp)
    
    
 

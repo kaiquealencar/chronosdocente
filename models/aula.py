@@ -7,6 +7,7 @@ class Aula(db.Model):
     dia_aula = db.Column(db.DateTime, nullable=False)
     hora_inicio = db.Column(db.Time, nullable=False)
     hora_fim = db.Column(db.Time, nullable=False)
+    quantidade_aulas = db.Column(db.Integer)
     
     disciplina_id = db.Column(db.Integer, db.ForeignKey("disciplinas.id"), nullable=False) 
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuarios.id"), nullable=False)
