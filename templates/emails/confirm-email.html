@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirme seu e-mail - ChronosDocente</title>
+    <style>
+        /* Estilos básicos para garantir renderização */
+        body { margin: 0; padding: 0; background-color: #f4f7f6; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; }
+        table { border-spacing: 0; }
+        td { padding: 0; }
+        img { border: 0; }
+        
+        .wrapper { width: 100%; table-layout: fixed; background-color: #f4f7f6; padding-bottom: 40px; }
+        .main { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-spacing: 0; color: #4a4a4a; border-radius: 8px; overflow: hidden; margin-top: 20px; }
+        
+        /* O "Desenho" do Relógio via CSS */
+        .clock-container { padding: 30px 0; text-align: center; background-color: #2c3e50; }
+        .clock-icon {
+            width: 80px; height: 80px; border: 4px solid #ffffff; border-radius: 50%;
+            display: inline-block; position: relative;
+        }
+        .clock-hand {
+            width: 4px; height: 30px; background-color: #ffffff;
+            position: absolute; left: 50%; top: 15%; margin-left: -2px;
+            transform-origin: bottom; transform: rotate(30deg); border-radius: 2px;
+        }
+        .clock-hand-short {
+            width: 4px; height: 20px; background-color: #1abc9c;
+            position: absolute; left: 50%; top: 30%; margin-left: -2px;
+            transform-origin: bottom; transform: rotate(110deg); border-radius: 2px;
+        }
+
+        .button {
+            background-color: #1abc9c; color: #ffffff; text-decoration: none;
+            padding: 15px 25px; border-radius: 5px; font-weight: bold; display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <center class="wrapper">
+        <table class="main" width="100%">
+            <tr>
+                <td class="clock-container">
+                    <div class="clock-icon">
+                        <div class="clock-hand"></div>
+                        <div class="clock-hand-short"></div>
+                    </div>
+                    <h1 style="color: #ffffff; margin-top: 15px; font-size: 24px;">ChronosDocente</h1>
+                </td>
+            </tr>
+            
+            <tr>
+                <td style="padding: 40px 30px;">
+                    <h2 style="color: #2c3e50;">Bem-vindo, Professor!</h2>
+                    <p style="font-size: 16px; line-height: 1.5;">
+                        Obrigado por se juntar ao <strong>ChronosDocente</strong>. Estamos quase prontos para ajudar você a otimizar seu tempo e gestão acadêmica.
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.5;">
+                        Por favor, clique no botão abaixo para confirmar seu endereço de e-mail e ativar sua conta.
+                    </p>
+                    
+                    <table width="100%">
+                        <tr>
+                            <td align="center" style="padding: 20px 0;">
+                                <a href="{{link_confirmacao}}" class="button">Confirmar Meu E-mail</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <p style="font-size: 14px; color: #888;">
+                        Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+                        <a href="{{link_confirmacao}}" style="color: #1abc9c;">{{link_confirmacao}}</a>
+                    </p>
+                </td>
+            </tr>
+            
+            <tr>
+                <td style="background-color: #eeeeee; padding: 20px; text-align: center; font-size: 12px; color: #777;">
+                    <p>© 2026 ChronosDocente - Gestão Inteligente para Docentes</p>
+                    <p>Se você não solicitou este cadastro, pode ignorar este e-mail.</p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>
