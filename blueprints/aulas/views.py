@@ -63,7 +63,7 @@ class AulaView(MethodView):
             dia_aula = datetime.strptime(request.form.get('dia_aula'), '%Y-%m-%d').date()
             hora_inicio = datetime.strptime(request.form.get('hora_inicio'), '%H:%M').time()
             hora_fim = datetime.strptime(request.form.get('hora_fim'), '%H:%M').time()
-            quantidade_aula = int(request.form.get('quantidade_aulas'))
+            quantidade_aulas = int(request.form.get('quantidade_aulas'))
             
             disciplina_id = int(request.form.get('disciplina_id'))
             escola_id = int(request.form.get('escola_id'))
@@ -75,13 +75,13 @@ class AulaView(MethodView):
 
         if id is None:
             sucesso, erro = create_aula(
-                dia_aula, hora_inicio, hora_fim, quantidade_aula, 
+                dia_aula, hora_inicio, hora_fim, quantidade_aulas, 
                 disciplina_id, usuario_id, escola_id, serie_id
             )
             mensagem = 'Aula agendada com sucesso!'
         else:
             sucesso, erro = edit_aula(
-                id, dia_aula, hora_inicio, hora_fim, quantidade_aula,
+                id, dia_aula, hora_inicio, hora_fim, quantidade_aulas,
                 disciplina_id, usuario_id, escola_id, serie_id
             )
             mensagem = 'Aula atualizada com sucesso!'
@@ -93,18 +93,19 @@ class AulaView(MethodView):
         flash(f'Erro: {erro}', 'error')
         
         aula_refill = {
-            'id': id,
+            'id': id, 
             'dia_aula': dia_aula,
             'hora_inicio': hora_inicio,
             'hora_fim': hora_fim,
             'disciplina_id': disciplina_id,
             'escola_id': escola_id,
-            'serie_id': serie_id
+            'serie_id': serie_id,
+            'quantidade_aulas': quantidade_aula 
         }
         
         disciplinas = Disciplina.query.filter_by(usuario_id=current_user.id).all()
-        escolas = Escola.query.all()
-        series = Serie.query.all()
+        escolas = Escola.query.filter_by(usuario_id=current_user.id).all()
+        series = Serie.query.filter_by(usuario_id=current_user.id).all()
 
         return render_template('aulas/form_aula.html', 
                                aula=aula_refill, 

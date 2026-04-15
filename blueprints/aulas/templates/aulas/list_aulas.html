@@ -33,6 +33,7 @@
                     <tr class="bg-slate-50/50 border-b border-slate-100">
                         <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider">Data e Horário</th>
                         <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider">Disciplina / Série</th>
+                        <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider">Qtd. Aulas </th>
                         <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider">Escola</th>
                         {% if is_admin %}
                         <th class="px-8 py-5 text-sm font-semibold text-slate-600 uppercase tracking-wider">Professor</th>
@@ -61,14 +62,18 @@
                         
                         <td class="px-8 py-5">
                             <div class="flex flex-col">
-                                <span class="font-bold text-slate-700">{{ aula.disciplina.nome }}</span>
+                                <span class="font-bold text-slate-700">{{ aula.disciplina.nome }} </span>
                                 <span class="inline-flex items-center gap-1 text-indigo-500 text-xs font-bold uppercase">
                                     <span class="material-symbols-outlined text-sm">groups</span>
                                     {{ aula.serie.nome }}
                                 </span>
                             </div>
                         </td>
-
+                         <td class="px-8 py-5">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-slate-700"> {{aula.quantidade_aulas}} {% if aula.quantidade_aulas > 1 %} aulas {% else %} aula {% endif %}</span>                               
+                            </div>
+                        </td>
                         <td class="px-8 py-5">
                             <div class="flex items-center text-slate-500 text-sm">
                                 <span class="material-symbols-outlined text-lg mr-1.5 text-slate-400">school</span>

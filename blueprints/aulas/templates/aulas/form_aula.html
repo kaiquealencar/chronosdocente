@@ -19,8 +19,7 @@
             </h1>
         </div>
 
-        <form action="{{ url_for('aulas.aulas_edit', id=aula.id) if aula else url_for('aulas.aulas_create') }}" method="POST" class="space-y-5">
-            
+        <form action="{{ url_for('aulas.aulas_edit', id=aula.id) if (aula and aula.id) else url_for('aulas.aulas_create') }}" method="POST" class="space-y-5">            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="dia_aula" class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Data da Aula</label>
@@ -28,7 +27,7 @@
                         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">event</span>
                         <input type="date" id="dia_aula" name="dia_aula" required
                             class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition-all"
-                            value="{{ aula.dia_aula.strftime('%Y-%m-%d') if aula and aula.dia_aula else '' }}">
+                            value="{{ aula.dia_aula if aula is mapping else (aula.dia_aula.strftime('%Y-%m-%d') if aula and aula.dia_aula else '') }}">
                     </div>
                 </div>
 
@@ -51,7 +50,7 @@
                         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">schedule</span>
                         <input type="time" id="hora_inicio" name="hora_inicio" required
                             class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition-all"
-                            value="{{ aula.hora_inicio.strftime('%H:%M') if aula and aula.hora_inicio else '' }}">
+                            value="{{ aula.hora_inicio if aula is mapping else (aula.hora_inicio.strftime('%H:%M') if aula and aula.hora_inicio else '') }}">
                     </div>
                 </div>
                 <div>
@@ -60,7 +59,7 @@
                         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">history_toggle_off</span>
                         <input type="time" id="hora_fim" name="hora_fim" required
                             class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition-all"
-                            value="{{ aula.hora_fim.strftime('%H:%M') if aula and aula.hora_fim else '' }}">
+                            value="{{ aula.hora_fim if aula is mapping else (aula.hora_fim.strftime('%H:%M') if aula and aula.hora_fim else '') }}">
                     </div>
                 </div>
             </div>
