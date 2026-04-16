@@ -5,8 +5,8 @@ class WebAppUser(HttpUser):
 
     def on_start(self):
         payload = {
-            "username": "kaique_admin",
-            "password": "k123ique88"
+            "username": "usuario_teste",
+            "password": "senha123"
         }
         
         response = self.client.post("/login", data=payload)
@@ -44,8 +44,5 @@ class WebAppUser(HttpUser):
 
     @task(1)
     def logout_test(self):
-        """ 
-        Opcional: Testa o logout e loga novamente para continuar as tarefas
-        """
         self.client.get("/logout")
         self.on_start()
