@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from flask.views import MethodView
+from sqlalchemy.orm import joinedload
 
 from utils.decorator import escola_pertence_ao_usuario
 from utils.pagination import criar_paginacao
@@ -39,7 +40,8 @@ class AulaView(MethodView):
                 disciplinas=disciplinas
             )
                
-        pagination, usuario_admin = criar_paginacao(request, Aula, current_user, 'dia_aula', True)
+        opcoes_otimizacao = [joinedload(Aula.disciplina), joinedload(Aula.escola)]
+        pagination, usuario_admin = criar_paginacao(request, Aula, current_user, 'dia_aula', True, options=opcoes_otimizacao)
          
         return render_template('aulas/list_aulas.html',
                                 aulas=pagination.items,

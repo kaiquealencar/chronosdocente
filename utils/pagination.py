@@ -2,7 +2,7 @@ from sqlalchemy import select, desc
 from extensions import db
 from utils.helpers import is_admin
 
-def criar_paginacao(request, model_class, current_user, ordenar_por=None, descendente=False):
+def criar_paginacao(request, model_class, current_user, ordenar_por=None, descendente=False, options=None):
     try:
          page = request.args.get('page', 1, type=int)
 
@@ -13,6 +13,9 @@ def criar_paginacao(request, model_class, current_user, ordenar_por=None, descen
     
     query = select(model_class)
     user_admin = is_admin()
+
+    if options:
+         query = query.options(*options)
 
     if not user_admin:
          query = query.where(model_class.usuario_id == current_user.id)
