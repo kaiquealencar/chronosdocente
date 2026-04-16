@@ -9,11 +9,11 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     MAIL_SERVER = os.getenv('MAIL_SERVER', 'sandbox.smtp.mailtrap.io')
-    MAIL_PORT = int(os.getenv('MAIL_PORT', 2525))    
+    MAIL_PORT = int(os.getenv('MAIL_PORT')    
     MAIL_USE_TLS = True  
     MAIL_USE_SSL = False 
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "17f877d27a9c8a")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "ecca7a45bb3f92")
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = "no-reply@chronosdocente.com.br"
 
 class DevConfig(Config):
